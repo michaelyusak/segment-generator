@@ -5,6 +5,8 @@ import (
 	"michaelyusak/biaenergi-segment-generator.git/adaptor"
 	"michaelyusak/biaenergi-segment-generator.git/config"
 	"michaelyusak/biaenergi-segment-generator.git/handler"
+	"michaelyusak/biaenergi-segment-generator.git/repository/neo4j"
+	"michaelyusak/biaenergi-segment-generator.git/service"
 	"net/http"
 	"os"
 	"os/signal"
@@ -26,10 +28,17 @@ func Init() {
 	}
 	defer neo4jDriver.Close(context.Background())
 
+	portRepository := neo4j.NewPortRepository(neo4jDriver, config.Service.Neo4j.DbName)
+	nodeRepository := neo4j.NewNodeRepository(neo4jDriver, config.Service.Neo4j.DbName)
+
+	canvasService := service.NewCanvasService(portRepository, nodeRepository)
+
 	healthHandler := handler.NewHealth()
+	canvasHandler := handler.NewCanvas(canvasService)
 
 	router := createRouter(routerOpts{
 		healthHandler: healthHandler,
+		canvasHandler: canvasHandler,
 	})
 
 	srv := http.Server{

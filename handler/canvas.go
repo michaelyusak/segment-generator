@@ -28,11 +28,49 @@ func (h *Canvas) GetPorts(ctx *gin.Context) {
 			Code:    entity.CodeInternalServerError,
 			Message: http.StatusText(http.StatusInternalServerError),
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, entity.Response{
 		Code:    entity.CodeSuccess,
 		Message: http.StatusText(http.StatusOK),
 		Data:    ports,
+	})
+}
+
+func (h *Canvas) GetPort(ctx *gin.Context) {
+	portID := ctx.Param("port_id")
+	if portID == "" {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, entity.Response{
+			Code:    entity.CodeBadRequest,
+			Message: http.StatusText(http.StatusBadRequest),
+		})
+		return
+	}
+
+	port, err := h.canvasService.GetPort(ctx, portID)
+	if err != nil {
+		logrus.WithError(err).WithField("port_id", portID).
+			Error("[handler][Canvas][GetPort] failed to get port")
+
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, entity.Response{
+			Code:    entity.CodeInternalServerError,
+			Message: http.StatusText(http.StatusInternalServerError),
+		})
+		return
+	}
+
+	if port == nil {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, entity.Response{
+			Code:    entity.CodeNotFound,
+			Message: http.StatusText(http.StatusNotFound),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, entity.Response{
+		Code:    entity.CodeSuccess,
+		Message: http.StatusText(http.StatusOK),
+		Data:    port,
 	})
 }

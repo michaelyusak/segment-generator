@@ -31,5 +31,7 @@ func healthRouting(r *gin.Engine, h *handler.Health) {
 func canvasRouting(r *gin.Engine, h *handler.Canvas) {
 	canvasGroup := r.Group("/v1/canvas")
 
-	canvasGroup.GET("/ports", h.GetPorts)
+	portGroup := canvasGroup.Group("/ports")
+	portGroup.GET("", h.GetPorts)
+	portGroup.GET("/:port_id", h.GetPort)
 }

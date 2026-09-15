@@ -4,17 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"michaelyusak/biaenergi-segment-generator.git/apperror"
 	"michaelyusak/biaenergi-segment-generator.git/entity"
 
 	"github.com/neo4j/neo4j-go-driver/v6/neo4j"
+	neo4jDriver "github.com/neo4j/neo4j-go-driver/v6/neo4j"
 )
 
 type portRepository struct {
-	driver neo4j.Driver
+	driver neo4jDriver.Driver
 	dbName string
 }
 
-func NewPortRepository(driver neo4j.Driver, dbName string) *portRepository {
+func NewPortRepository(driver neo4jDriver.Driver, dbName string) *portRepository {
 	return &portRepository{
 		driver: driver,
 		dbName: dbName,
@@ -37,36 +39,41 @@ func (r *portRepository) GetPorts(ctx context.Context) ([]entity.Port, error) {
 	res := make([]entity.Port, 0, len(result.Records))
 
 	for _, record := range result.Records {
-		idAny, ok := record.Get("id")
-		if !ok {
-			return nil, fmt.Errorf("missing port id")
-		}
-
-		id, ok := idAny.(string)
-		if !ok {
-			return nil, fmt.Errorf("port id has type %T, want string", idAny)
-		}
-
-		port := entity.Port{
-			ID: id,
-		}
-
-		valueAny, ok := record.Get("value")
-		if !ok {
-			return nil, fmt.Errorf("missing port value")
-		}
-
-		if valueAny != nil {
-			value, ok := valueAny.(int64)
-			if !ok {
-				return nil, fmt.Errorf("port %q value has type %T, want int64", id, valueAny)
-			}
-
-			port.Value = &value
+		port, err := parsePort(record)
+		if err != nil {
+			return nil, fmt.Errorf("[repository][neo4j][GetPorts] failed to parse port from record: %w", err)
 		}
 
 		res = append(res, port)
 	}
 
 	return res, nil
+}
+
+func (r *portRepository) GetPort(ctx context.Context, portID string) (*entity.Port, error) {
+	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
+		MATCH (p: Port)
+		WHERE p.id = $id
+		RETURN p.id as id, p.value as value;
+	`,
+		map[string]any{
+			"id": portID,
+		},
+		neo4j.EagerResultTransformer,
+		neo4j.ExecuteQueryWithDatabase(r.dbName),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("[repository][neo4j][GetPort] failed to execute queries: %w", err)
+	}
+
+	if len(result.Records) < 1 {
+		return nil, fmt.Errorf("[repository][neo4j][GetPort] record not found %w", apperror.ErrNotFound)
+	}
+
+	port, err := parsePort(result.Records[0])
+	if err != nil {
+		return nil, fmt.Errorf("[repository][neo4j][GetPort] failed to parse port from record %w", err)
+	}
+
+	return &port, nil
 }

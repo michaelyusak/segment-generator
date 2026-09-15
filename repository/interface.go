@@ -11,4 +11,5 @@ type Node interface {
 
 type Port interface {
 	GetPorts(ctx context.Context) ([]entity.Port, error)
+	GetPort(ctx context.Context, portID string) (*entity.Port, error)
 }

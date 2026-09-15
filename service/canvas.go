@@ -11,11 +11,13 @@ import (
 
 type canvasService struct {
 	portRepository repository.Port
+	nodeRepository repository.Node
 }
 
-func NewCanvasService(portRepository repository.Port) *canvasService {
+func NewCanvasService(portRepository repository.Port, nodeRepository repository.Node) *canvasService {
 	return &canvasService{
 		portRepository: portRepository,
+		nodeRepository: nodeRepository,
 	}
 }
 
@@ -28,7 +30,6 @@ func (s *canvasService) GetPorts(ctx context.Context) ([]entity.Port, error) {
 	return ports, nil
 }
 
-
 func (s *canvasService) GetPort(ctx context.Context, portID string) (*entity.Port, error) {
 	port, err := s.portRepository.GetPort(ctx, portID)
 	if err != nil {
@@ -40,4 +41,13 @@ func (s *canvasService) GetPort(ctx context.Context, portID string) (*entity.Por
 	}
 
 	return port, nil
+}
+
+func (s *canvasService) GetNodes(ctx context.Context) ([]entity.Node, error) {
+	nodes, err := s.nodeRepository.GetNodes(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("[service][canvasService][GetNodes] failed to get nodes: %w", err)
+	}
+
+	return nodes, nil
 }

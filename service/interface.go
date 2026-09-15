@@ -6,6 +6,10 @@ import (
 )
 
 type Canvas interface {
+	// ports
 	GetPorts(ctx context.Context) ([]entity.Port, error)
 	GetPort(ctx context.Context, portID string) (*entity.Port, error)
+
+	// nodes
+	GetNodes(ctx context.Context) ([]entity.Node, error)
 }

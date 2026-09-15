@@ -29,8 +29,9 @@ func Init() {
 	defer neo4jDriver.Close(context.Background())
 
 	portRepository := neo4j.NewPortRepository(neo4jDriver, config.Service.Neo4j.DbName)
+	nodeRepository := neo4j.NewNodeRepository(neo4jDriver, config.Service.Neo4j.DbName)
 
-	canvasService := service.NewCanvasService(portRepository)
+	canvasService := service.NewCanvasService(portRepository, nodeRepository)
 
 	healthHandler := handler.NewHealth()
 	canvasHandler := handler.NewCanvas(canvasService)

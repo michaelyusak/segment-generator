@@ -74,3 +74,22 @@ func (h *Canvas) GetPort(ctx *gin.Context) {
 		Data:    port,
 	})
 }
+
+func (h *Canvas) GetNodes(ctx *gin.Context) {
+	nodes, err := h.canvasService.GetNodes(ctx.Request.Context())
+	if err != nil {
+		logrus.WithError(err).Error("[handler][Canvas][GetNodes] failed to get nodes")
+
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, entity.Response{
+			Code:    entity.CodeInternalServerError,
+			Message: http.StatusText(http.StatusInternalServerError),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, entity.Response{
+		Code:    entity.CodeSuccess,
+		Message: http.StatusText(http.StatusOK),
+		Data:    nodes,
+	})
+}

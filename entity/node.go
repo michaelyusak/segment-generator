@@ -1,6 +1,6 @@
 package entity
 
 type Node struct {
-	ID    string `json:"id"`
+	ID    int64  `json:"id"`
 	Ports []Port `json:"ports"`
 }

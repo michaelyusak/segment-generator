@@ -4,6 +4,7 @@ import (
 	"michaelyusak/biaenergi-segment-generator.git/entity"
 	"michaelyusak/biaenergi-segment-generator.git/service"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -91,5 +92,51 @@ func (h *Canvas) GetNodes(ctx *gin.Context) {
 		Code:    entity.CodeSuccess,
 		Message: http.StatusText(http.StatusOK),
 		Data:    nodes,
+	})
+}
+
+func (h *Canvas) GetNode(ctx *gin.Context) {
+	nodeIDStr := ctx.Param("node_id")
+	if nodeIDStr == "" {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, entity.Response{
+			Code:    entity.CodeBadRequest,
+			Message: http.StatusText(http.StatusBadRequest),
+		})
+		return
+	}
+
+	nodeID, err := strconv.ParseInt(nodeIDStr, 10, 64)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, entity.Response{
+			Code:    entity.CodeBadRequest,
+			Message: http.StatusText(http.StatusBadRequest),
+		})
+		return
+	}
+
+	node, err := h.canvasService.GetNode(ctx, nodeID)
+	if err != nil {
+		logrus.WithError(err).WithField("node_id", nodeID).
+			Error("[handler][Canvas][GetNode] failed to get node")
+
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, entity.Response{
+			Code:    entity.CodeInternalServerError,
+			Message: http.StatusText(http.StatusInternalServerError),
+		})
+		return
+	}
+
+	if node == nil {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, entity.Response{
+			Code:    entity.CodeNotFound,
+			Message: http.StatusText(http.StatusNotFound),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, entity.Response{
+		Code:    entity.CodeSuccess,
+		Message: http.StatusText(http.StatusOK),
+		Data:    node,
 	})
 }

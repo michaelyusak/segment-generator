@@ -12,4 +12,5 @@ type Canvas interface {
 
 	// nodes
 	GetNodes(ctx context.Context) ([]entity.Node, error)
+	GetNode(ctx context.Context, nodeID int64) (*entity.Node, error)
 }

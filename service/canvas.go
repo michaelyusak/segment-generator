@@ -51,3 +51,16 @@ func (s *canvasService) GetNodes(ctx context.Context) ([]entity.Node, error) {
 
 	return nodes, nil
 }
+
+func (s *canvasService) GetNode(ctx context.Context, nodeID int64) (*entity.Node, error) {
+	node, err := s.nodeRepository.GetNode(ctx, nodeID)
+	if err != nil {
+		if errors.Is(err, apperror.ErrNotFound) {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("[service][canvasService][GetNode] failed to get node: %w [node_id: %d]", err, nodeID)
+	}
+
+	return node, nil
+}

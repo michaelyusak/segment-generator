@@ -37,4 +37,5 @@ func canvasRouting(r *gin.Engine, h *handler.Canvas) {
 
 	nodeGroup := canvasGroup.Group("/nodes")
 	nodeGroup.GET("", h.GetNodes)
+	nodeGroup.GET("/:node_id", h.GetNode)
 }

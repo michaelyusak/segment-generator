@@ -121,3 +121,61 @@ func parseNode(record *neo4jDriver.Record) (entity.Node, error) {
 
 	return node, nil
 }
+
+func parseConnection(record *neo4jDriver.Record) (entity.PortConnection, error) {
+	var connection entity.PortConnection
+
+	sourceIDAny, ok := record.Get("source_id")
+	if !ok {
+		return connection, fmt.Errorf("missing source_id")
+	}
+
+	sourceID, ok := sourceIDAny.(string)
+	if !ok {
+		return connection, fmt.Errorf("invalid source_id")
+	}
+
+	connection.Source.ID = sourceID
+
+	sourceValueAny, ok := record.Get("source_value")
+	if !ok {
+		return connection, fmt.Errorf("missing source_value")
+	}
+	if sourceValueAny != nil {
+		sourceValue, ok := sourceValueAny.(int64)
+		if !ok {
+			return connection, fmt.Errorf("port %s value has type %T, want int64", sourceID, sourceValueAny)
+		}
+
+		connection.Source.Value = &sourceValue
+	}
+
+	targetIDAny, ok := record.Get("target_id")
+	if !ok {
+		return connection, fmt.Errorf("missing target_id")
+	}
+
+	targetID, ok := targetIDAny.(string)
+	if !ok {
+		return connection, fmt.Errorf("invalid target_id")
+	}
+
+	connection.Target.ID = targetID
+
+	targetValueAny, ok := record.Get("target_value")
+	if !ok {
+		return connection, fmt.Errorf("missing target_value")
+	}
+	if targetValueAny != nil {
+		targetValue, ok := targetValueAny.(int64)
+		if !ok {
+			return connection, fmt.Errorf("port %s value has type %T, want int64", targetID, targetValueAny)
+		}
+
+		connection.Target.Value = &targetValue
+	}
+
+	connection.WriteName()
+
+	return connection, nil
+}

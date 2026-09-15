@@ -64,3 +64,12 @@ func (s *canvasService) GetNode(ctx context.Context, nodeID int64) (*entity.Node
 
 	return node, nil
 }
+
+func (s *canvasService) GetConnections(ctx context.Context) ([]entity.PortConnection, error) {
+	connections, err := s.portRepository.GetConnections(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("[service][canvasService][GetConnections] failed to get connections: %w", err)
+	}
+
+	return connections, nil
+}

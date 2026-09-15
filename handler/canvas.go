@@ -49,7 +49,7 @@ func (h *Canvas) GetPort(ctx *gin.Context) {
 		return
 	}
 
-	port, err := h.canvasService.GetPort(ctx, portID)
+	port, err := h.canvasService.GetPort(ctx.Request.Context(), portID)
 	if err != nil {
 		logrus.WithError(err).WithField("port_id", portID).
 			Error("[handler][Canvas][GetPort] failed to get port")
@@ -114,7 +114,7 @@ func (h *Canvas) GetNode(ctx *gin.Context) {
 		return
 	}
 
-	node, err := h.canvasService.GetNode(ctx, nodeID)
+	node, err := h.canvasService.GetNode(ctx.Request.Context(), nodeID)
 	if err != nil {
 		logrus.WithError(err).WithField("node_id", nodeID).
 			Error("[handler][Canvas][GetNode] failed to get node")
@@ -138,5 +138,24 @@ func (h *Canvas) GetNode(ctx *gin.Context) {
 		Code:    entity.CodeSuccess,
 		Message: http.StatusText(http.StatusOK),
 		Data:    node,
+	})
+}
+
+func (h *Canvas) GetConnections(ctx *gin.Context) {
+	connections, err := h.canvasService.GetConnections(ctx.Request.Context())
+	if err != nil {
+		logrus.WithError(err).Error("[handler][Canvas][GetConnections] failed to get connections")
+
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, entity.Response{
+			Code:    entity.CodeInternalServerError,
+			Message: http.StatusText(http.StatusInternalServerError),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, entity.Response{
+		Code:    entity.CodeSuccess,
+		Message: http.StatusText(http.StatusOK),
+		Data:    connections,
 	})
 }

@@ -18,7 +18,7 @@ func (h *Health) Get(ctx *gin.Context) {
 	ctx.JSON(
 		http.StatusOK,
 		entity.Response{
-			Code:    "SUCCESS",
+			Code:    entity.CodeSuccess,
 			Message: "ok",
 		})
 }

@@ -11,6 +11,7 @@ type Neo4jConfig struct {
 	Uri            string          `json:"uri"`
 	Username       string          `json:"username"`
 	Password       string          `json:"password"`
+	DbName         string          `json:"db_name"`
 	ConnectTimeout entity.Duration `json:"connect_timeout"`
 }
 

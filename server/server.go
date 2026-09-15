@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"michaelyusak/biaenergi-segment-generator.git/adaptor"
 	"michaelyusak/biaenergi-segment-generator.git/config"
 	"michaelyusak/biaenergi-segment-generator.git/handler"
 	"net/http"
@@ -18,6 +19,12 @@ func Init() {
 	if err != nil {
 		logrus.WithError(err).Fatal("config init failed")
 	}
+
+	neo4jDriver, err := adaptor.ConnectNeo4j(config.Service.Neo4j)
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to connect to neo4j")
+	}
+	defer neo4jDriver.Close(context.Background())
 
 	healthHandler := handler.NewHealth()
 

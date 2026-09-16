@@ -17,3 +17,7 @@ type Canvas interface {
 	// connections
 	GetConnections(ctx context.Context) ([]entity.PortConnection, error)
 }
+
+type Segment interface {
+	GetSegments(ctx context.Context) ([]entity.Segment, error)
+}

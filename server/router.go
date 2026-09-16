@@ -7,8 +7,9 @@ import (
 )
 
 type routerOpts struct {
-	healthHandler *handler.Health
-	canvasHandler *handler.Canvas
+	healthHandler  *handler.Health
+	canvasHandler  *handler.Canvas
+	segmentHandler *handler.Segment
 }
 
 func createRouter(opt routerOpts) *gin.Engine {
@@ -20,6 +21,7 @@ func createRouter(opt routerOpts) *gin.Engine {
 
 	healthRouting(router, opt.healthHandler)
 	canvasRouting(router, opt.canvasHandler)
+	segmentRouting(router, opt.segmentHandler)
 
 	return router
 }
@@ -39,4 +41,9 @@ func canvasRouting(r *gin.Engine, h *handler.Canvas) {
 	nodeGroup := canvasGroup.Group("/nodes")
 	nodeGroup.GET("", h.GetNodes)
 	nodeGroup.GET("/:node_id", h.GetNode)
+}
+
+func segmentRouting(r *gin.Engine, h *handler.Segment) {
+	segmentGroup := r.Group("/v1/segments")
+	segmentGroup.GET("", h.GetSegments)
 }

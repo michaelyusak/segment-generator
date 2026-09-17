@@ -7,7 +7,7 @@ import (
 
 type Segment struct {
 	Name    string  `json:"name"`
-	Value   int64   `json:"value"`
+	Result  int64   `json:"result"`
 	Target  *Port   `json:"target"`
 	Sources []*Port `json:"sources"`
 }
@@ -22,7 +22,7 @@ func (s *Segment) Finalise() {
 		sumSourceValues += *source.Value
 	}
 
-	s.Value = *s.Target.Value - sumSourceValues
+	s.Result = *s.Target.Value - sumSourceValues
 
 	if len(s.Sources) == 1 {
 		s.Name = fmt.Sprintf("%s - %s", s.Target.ID, sourceIDs[0])

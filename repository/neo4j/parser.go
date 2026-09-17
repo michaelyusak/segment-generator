@@ -47,6 +47,16 @@ func parsePort(record *neo4jDriver.Record) (entity.Port, error) {
 		port.Value = &value
 	}
 
+	nodeIDAny, ok := record.Get("node_id")
+	if ok {
+		nodeID, ok := nodeIDAny.(int64)
+		if !ok {
+			return port, fmt.Errorf("port %q node_id has type %T, want int64", id, nodeIDAny)
+		}
+
+		port.NodeID = nodeID
+	}
+
 	return port, nil
 }
 
@@ -150,6 +160,18 @@ func parseConnection(record *neo4jDriver.Record) (entity.PortConnection, error) 
 		connection.Source.Value = &sourceValue
 	}
 
+	sourceNodeIDAny, ok := record.Get("source_node_id")
+	if !ok {
+		return connection, fmt.Errorf("missing source_node_id")
+	}
+
+	sourceNodeID, ok := sourceNodeIDAny.(int64)
+	if !ok {
+		return connection, fmt.Errorf("port %s value has node_id type %T, want int64", sourceID, sourceNodeIDAny)
+	}
+
+	connection.Source.NodeID = sourceNodeID
+
 	targetIDAny, ok := record.Get("target_id")
 	if !ok {
 		return connection, fmt.Errorf("missing target_id")
@@ -174,6 +196,18 @@ func parseConnection(record *neo4jDriver.Record) (entity.PortConnection, error) 
 
 		connection.Target.Value = &targetValue
 	}
+
+	targetNodeIDAny, ok := record.Get("target_node_id")
+	if !ok {
+		return connection, fmt.Errorf("missing target_node_id")
+	}
+
+	targetNodeID, ok := targetNodeIDAny.(int64)
+	if !ok {
+		return connection, fmt.Errorf("port %s value has node_id type %T, want int64", targetID, targetNodeIDAny)
+	}
+
+	connection.Target.NodeID = targetNodeID
 
 	connection.WriteName()
 

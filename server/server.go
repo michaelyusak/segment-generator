@@ -32,13 +32,16 @@ func Init() {
 	nodeRepository := neo4j.NewNodeRepository(neo4jDriver, config.Service.Neo4j.DbName)
 
 	canvasService := service.NewCanvasService(portRepository, nodeRepository)
+	segmentService := service.NewSegmentService(portRepository)
 
 	healthHandler := handler.NewHealth()
 	canvasHandler := handler.NewCanvas(canvasService)
+	segmentHandler := handler.NewSegment(segmentService)
 
 	router := createRouter(routerOpts{
-		healthHandler: healthHandler,
-		canvasHandler: canvasHandler,
+		healthHandler:  healthHandler,
+		canvasHandler:  canvasHandler,
+		segmentHandler: segmentHandler,
 	})
 
 	srv := http.Server{

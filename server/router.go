@@ -11,6 +11,7 @@ type routerOpts struct {
 	healthHandler  *handler.Health
 	canvasHandler  *handler.Canvas
 	segmentHandler *handler.Segment
+	commonHandler  handler.Common
 }
 
 func createRouter(opt routerOpts) *gin.Engine {
@@ -20,6 +21,8 @@ func createRouter(opt routerOpts) *gin.Engine {
 		gin.Recovery(),
 		middleware.Logger(),
 	)
+
+	router.NoRoute(opt.commonHandler.NotFound)
 
 	healthRouting(router, opt.healthHandler)
 	canvasRouting(router, opt.canvasHandler)

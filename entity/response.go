@@ -5,6 +5,7 @@ const (
 	CodeInternalServerError = "INTERNAL_SERVER_ERROR"
 	CodeBadRequest          = "BAD_REQUEST"
 	CodeNotFound            = "NOT_FOUND"
+	CodeNotAllowed          = "NOT_ALLOWED"
 )
 
 type Response struct {

@@ -17,3 +17,4 @@ schema:
 * `/v1/canvas/ports/connections` - list all port connections
 * `/v1/canvas/nodes` - list all nodes with their ports
 * `/v1/canvas/nodes/:node_id` - get node detail
+* `/v1/segments` - get segments count, results, and details

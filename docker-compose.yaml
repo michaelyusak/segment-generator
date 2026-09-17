@@ -1,0 +1,37 @@
+services:
+  segment-generator:
+    image: segment-generator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+      SEGMENT_GENERATOR_CONFIG_JSON: /config/config.json
+    volumes:
+      - ./config/config.json:/config/config.json
+    depends_on:
+      - neo4j
+    networks:
+      - segment-network
+
+  neo4j:
+    image: neo4j:2026.08.1
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/password
+      SEED_NEO4J_USER: neo4j
+      SEED_NEO4J_PASSWORD: password
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./schema/neo4j:/schema:ro
+    networks:
+      - segment-network
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+
+networks:
+  segment-network:
+    driver: bridge

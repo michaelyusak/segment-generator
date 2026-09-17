@@ -19,6 +19,14 @@ func NewSegment(segmentService service.Segment) *Segment {
 	}
 }
 
+// Get segments
+// @Summary Get segments
+// @Description Returns all segments
+// @Tags segments
+// @Produce json
+// @Success 200 {object} entity.Response{data=object{count=int,segments=[]entity.Segment}}
+// @Failure 500 {object} entity.Response
+// @Router /v1/segments [get]
 func (h *Segment) GetSegments(ctx *gin.Context) {
 	segments, err := h.segmentService.GetSegments(ctx.Request.Context())
 	if err != nil {

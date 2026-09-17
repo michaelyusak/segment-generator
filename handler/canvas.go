@@ -20,6 +20,14 @@ func NewCanvas(canvasService service.Canvas) *Canvas {
 	}
 }
 
+// Get canvas ports
+// @Summary Get canvas ports
+// @Description Returns all canvas ports
+// @Tags canvas
+// @Produce json
+// @Success 200 {object} entity.Response{data=[]entity.Port}
+// @Failure 500 {object} entity.Response
+// @Router /v1/canvas/ports [get]
 func (h *Canvas) GetPorts(ctx *gin.Context) {
 	ports, err := h.canvasService.GetPorts(ctx.Request.Context())
 	if err != nil {
@@ -39,6 +47,17 @@ func (h *Canvas) GetPorts(ctx *gin.Context) {
 	})
 }
 
+// Get canvas port detail
+// @Summary Get canvas port detail
+// @Description Returns canvas port detail
+// @Tags canvas
+// @Produce json
+// @Param port_id path string true "Port ID"
+// @Success 200 {object} entity.Response{data=entity.Port}
+// @Failure 400 {object} entity.Response
+// @Failure 404 {object} entity.Response
+// @Failure 500 {object} entity.Response
+// @Router /v1/canvas/ports/{port_id} [get]
 func (h *Canvas) GetPort(ctx *gin.Context) {
 	portID := ctx.Param("port_id")
 	if portID == "" {
@@ -76,6 +95,14 @@ func (h *Canvas) GetPort(ctx *gin.Context) {
 	})
 }
 
+// Get canvas nodes
+// @Summary Get canvas nodes
+// @Description Returns all canvas nodes
+// @Tags canvas
+// @Produce json
+// @Success 200 {object} entity.Response{data=[]entity.Node}
+// @Failure 500 {object} entity.Response
+// @Router /v1/canvas/nodes [get]
 func (h *Canvas) GetNodes(ctx *gin.Context) {
 	nodes, err := h.canvasService.GetNodes(ctx.Request.Context())
 	if err != nil {
@@ -95,6 +122,17 @@ func (h *Canvas) GetNodes(ctx *gin.Context) {
 	})
 }
 
+// Get canvas node detail
+// @Summary Get canvas node detail
+// @Description Returns canvas node detail
+// @Tags canvas
+// @Produce json
+// @Param node_id path int64 true "Node ID"
+// @Success 200 {object} entity.Response{data=entity.Node}
+// @Failure 400 {object} entity.Response
+// @Failure 404 {object} entity.Response
+// @Failure 500 {object} entity.Response
+// @Router /v1/canvas/nodes/{node_id} [get]
 func (h *Canvas) GetNode(ctx *gin.Context) {
 	nodeIDStr := ctx.Param("node_id")
 	if nodeIDStr == "" {
@@ -141,6 +179,14 @@ func (h *Canvas) GetNode(ctx *gin.Context) {
 	})
 }
 
+// Get canvas port connections
+// @Summary Get canvas port connections
+// @Description Returns all canvas port connections
+// @Tags canvas
+// @Produce json
+// @Success 200 {object} entity.Response{data=[]entity.PortConnection}
+// @Failure 500 {object} entity.Response
+// @Router /v1/canvas/ports/connections [get]
 func (h *Canvas) GetConnections(ctx *gin.Context) {
 	connections, err := h.canvasService.GetConnections(ctx.Request.Context())
 	if err != nil {

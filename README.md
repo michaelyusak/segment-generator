@@ -1,20 +1,38 @@
 # biaenergi-segment-generator
 
 ## Stacks
-### Neo4j
-* Graph structures 
-* Fast traversals for linked data
 
-schema:
+### Neo4j
+
+* Graph structure and relationship storage
+* Fast traversal of linked data
+
+Schema and seed data:
+
 * [schema.cypher](./schema/neo4j/schema.cypher)
 * [seed.cypher](./schema/neo4j/seed.cypher)
 
-### Go Programming Language
+### Go
+
+* REST API
+* Service and business logic
+
+## API Documentation
+
+For detailed API documentation, start the service and visit:
+
+[Swagger UI](http://localhost:8080/swagger/index.html)
 
 ## Endpoints
-* `/v1/canvas/ports` - list all ports and values
-* `/v1/canvas/ports/:port_id` - get port detail
-* `/v1/canvas/ports/connections` - list all port connections
-* `/v1/canvas/nodes` - list all nodes with their ports
-* `/v1/canvas/nodes/:node_id` - get node detail
-* `/v1/segments` - get segments count, results, and details
+
+### Canvas
+
+* `GET /v1/canvas/ports` — List all ports and their values
+* `GET /v1/canvas/ports/{port_id}` — Get port details
+* `GET /v1/canvas/ports/connections` — List all port connections
+* `GET /v1/canvas/nodes` — List all nodes with their ports
+* `GET /v1/canvas/nodes/{node_id}` — Get node details
+
+### Segments
+
+* `GET /v1/segments` — Get the segment count and segment results

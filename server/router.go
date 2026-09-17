@@ -1,8 +1,12 @@
 package server
 
 import (
+	"michaelyusak/biaenergi-segment-generator.git/docs"
 	"michaelyusak/biaenergi-segment-generator.git/handler"
 	"michaelyusak/biaenergi-segment-generator.git/middleware"
+
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +32,8 @@ func createRouter(opt routerOpts) *gin.Engine {
 	canvasRouting(router, opt.canvasHandler)
 	segmentRouting(router, opt.segmentHandler)
 
+	swaggerRouting(router)
+
 	return router
 }
 
@@ -51,4 +57,10 @@ func canvasRouting(r *gin.Engine, h *handler.Canvas) {
 func segmentRouting(r *gin.Engine, h *handler.Segment) {
 	segmentGroup := r.Group("/v1/segments")
 	segmentGroup.GET("", h.GetSegments)
+}
+
+func swaggerRouting(r *gin.Engine) {
+	docs.SwaggerInfo.Title = "Segment Generator"
+	docs.SwaggerInfo.Host = "localhost:8080"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 }

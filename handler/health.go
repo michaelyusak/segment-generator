@@ -14,6 +14,13 @@ func NewHealth() *Health {
 	return &Health{}
 }
 
+// Get health status
+// @Summary Health check
+// @Description Returns the health status of the service
+// @Tags health
+// @Produce json
+// @Success 200 {object} entity.Response
+// @Router /health [get]
 func (h *Health) Get(ctx *gin.Context) {
 	ctx.JSON(
 		http.StatusOK,

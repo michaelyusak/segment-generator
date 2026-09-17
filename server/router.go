@@ -2,6 +2,7 @@ package server
 
 import (
 	"michaelyusak/biaenergi-segment-generator.git/handler"
+	"michaelyusak/biaenergi-segment-generator.git/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +18,7 @@ func createRouter(opt routerOpts) *gin.Engine {
 
 	router.Use(
 		gin.Recovery(),
+		middleware.Logger(),
 	)
 
 	healthRouting(router, opt.healthHandler)

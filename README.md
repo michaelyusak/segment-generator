@@ -17,6 +17,22 @@ Schema and seed data:
 * REST API
 * Service and business logic
 
+## Getting Started
+
+Copy the example configuration:
+
+```bash
+cp ./config/config.example.json ./config/config.json
+```
+
+Start the services with Docker Compose:
+
+```bash
+docker-compose up
+```
+
+The application will start on port `8080`.
+
 ## API Documentation
 
 For detailed API documentation, start the service and visit:

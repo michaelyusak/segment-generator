@@ -26,7 +26,8 @@ func NewPortRepository(driver neo4jDriver.Driver, dbName string) *portRepository
 func (r *portRepository) GetPorts(ctx context.Context) ([]entity.Port, error) {
 	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
 		MATCH (p: Port)
-		RETURN p.id as id, p.value as value
+		MATCH (n: Node)-[:HAS_PORT]->(p)
+		RETURN p.id as id, p.value as value, n.id as node_id
 		ORDER BY p.id ASC;
 	`,
 		nil,
@@ -54,8 +55,10 @@ func (r *portRepository) GetPorts(ctx context.Context) ([]entity.Port, error) {
 func (r *portRepository) GetPort(ctx context.Context, portID string) (*entity.Port, error) {
 	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
 		MATCH (p: Port)
+		MATCH (n: Node)-[:HAS_PORT]->(p)
 		WHERE p.id = $id
-		RETURN p.id as id, p.value as value;
+		RETURN p.id as id, p.value as value, n.id as node_id
+		ORDER BY p.id ASC;
 	`,
 		map[string]any{
 			"id": portID,

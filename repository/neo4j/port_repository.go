@@ -110,65 +110,6 @@ func (r *portRepository) GetConnections(ctx context.Context) ([]entity.PortConne
 	return res, nil
 }
 
-func (r *portRepository) GetSegmentHeads(ctx context.Context) ([]entity.Port, error) {
-	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
-		MATCH (p:Port)
-		MATCH (n:Node)-[ :HAS_PORT]->(p)
-		WHERE NOT (p)-[:NEXT]->()
-		return p.id as id, p.value as value, n.id as node_id;
-	`,
-		nil,
-		neo4j.EagerResultTransformer,
-		neo4j.ExecuteQueryWithDatabase(r.dbName),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("[repository][neo4j][GetHeads] failed to execute queries: %w", err)
-	}
-
-	res := make([]entity.Port, 0, len(result.Records))
-
-	for _, record := range result.Records {
-		port, err := parsePort(record)
-		if err != nil {
-			return nil, fmt.Errorf("[repository][neo4j][GetHeads] failed to parse segment heads from record: %w", err)
-		}
-
-		res = append(res, port)
-	}
-
-	return res, nil
-}
-
-func (r *portRepository) GetAllConnections(ctx context.Context) ([]entity.PortConnection, error) {
-	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
-		MATCH (source:Port)-[:NEXT]->(target:Port)
-		MATCH (sourceNode:Node)-[:HAS_PORT]->(source)
-		MATCH (targetNode:Node)-[:HAS_PORT]->(target)
-		RETURN source.id AS source_id, source.value AS source_value, sourceNode.id as source_node_id, target.id AS target_id, target.value AS target_value, targetNode.id AS target_node_id
-		ORDER BY targetNode.id, target ASC;
-	`,
-		nil,
-		neo4j.EagerResultTransformer,
-		neo4j.ExecuteQueryWithDatabase(r.dbName),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("[repository][neo4j][GetConnections] failed to execute queries: %w", err)
-	}
-
-	res := make([]entity.PortConnection, 0, len(result.Records))
-
-	for _, record := range result.Records {
-		connection, err := parseConnection(record)
-		if err != nil {
-			return nil, fmt.Errorf("[repository][neo4j][GetPorts] failed to connection port from record: %w", err)
-		}
-
-		res = append(res, connection)
-	}
-
-	return res, nil
-}
-
 func (r *portRepository) GetPaths(ctx context.Context) (map[string][][]entity.Port, error) {
 	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
 		MATCH (head:Port)

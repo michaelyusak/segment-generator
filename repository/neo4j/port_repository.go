@@ -26,7 +26,8 @@ func NewPortRepository(driver neo4jDriver.Driver, dbName string) *portRepository
 func (r *portRepository) GetPorts(ctx context.Context) ([]entity.Port, error) {
 	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
 		MATCH (p: Port)
-		RETURN p.id as id, p.value as value
+		MATCH (n: Node)-[:HAS_PORT]->(p)
+		RETURN p.id as id, p.value as value, n.id as node_id
 		ORDER BY p.id ASC;
 	`,
 		nil,
@@ -54,8 +55,10 @@ func (r *portRepository) GetPorts(ctx context.Context) ([]entity.Port, error) {
 func (r *portRepository) GetPort(ctx context.Context, portID string) (*entity.Port, error) {
 	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
 		MATCH (p: Port)
+		MATCH (n: Node)-[:HAS_PORT]->(p)
 		WHERE p.id = $id
-		RETURN p.id as id, p.value as value;
+		RETURN p.id as id, p.value as value, n.id as node_id
+		ORDER BY p.id ASC;
 	`,
 		map[string]any{
 			"id": portID,
@@ -110,60 +113,39 @@ func (r *portRepository) GetConnections(ctx context.Context) ([]entity.PortConne
 	return res, nil
 }
 
-func (r *portRepository) GetSegmentHeads(ctx context.Context) ([]entity.Port, error) {
+func (r *portRepository) GetPaths(ctx context.Context) (map[string][][]entity.Port, error) {
 	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
-		MATCH (p:Port)
-		MATCH (n:Node)-[ :HAS_PORT]->(p)
-		WHERE NOT (p)-[:NEXT]->()
-		return p.id as id, p.value as value, n.id as node_id;
+		MATCH (head:Port)
+		WHERE NOT (head)-[:NEXT]->()
+
+		MATCH (tail:Port)
+		WHERE NOT ()-[:NEXT]->(tail)
+
+		MATCH path = (tail)-[:NEXT*]->(head)
+
+		RETURN [p IN reverse(nodes(path)) | {id: p.id, value: p.value}] AS path
 	`,
 		nil,
 		neo4j.EagerResultTransformer,
 		neo4j.ExecuteQueryWithDatabase(r.dbName),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("[repository][neo4j][GetHeads] failed to execute queries: %w", err)
+		return nil, fmt.Errorf("[repository][neo4j][GetPaths] failed to execute queries: %w", err)
 	}
 
-	res := make([]entity.Port, 0, len(result.Records))
+	res := map[string][][]entity.Port{}
 
 	for _, record := range result.Records {
-		port, err := parsePort(record)
+		path, err := parsePath(record)
 		if err != nil {
-			return nil, fmt.Errorf("[repository][neo4j][GetHeads] failed to parse segment heads from record: %w", err)
+			return nil, fmt.Errorf("[repository][neo4j][GetPaths] failed to parse path from record: %w", err)
 		}
 
-		res = append(res, port)
-	}
-
-	return res, nil
-}
-
-func (r *portRepository) GetAllConnections(ctx context.Context) ([]entity.PortConnection, error) {
-	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
-		MATCH (source:Port)-[:NEXT]->(target:Port)
-		MATCH (sourceNode:Node)-[:HAS_PORT]->(source)
-		MATCH (targetNode:Node)-[:HAS_PORT]->(target)
-		RETURN source.id AS source_id, source.value AS source_value, sourceNode.id as source_node_id, target.id AS target_id, target.value AS target_value, targetNode.id AS target_node_id
-		ORDER BY targetNode.id, target ASC;
-	`,
-		nil,
-		neo4j.EagerResultTransformer,
-		neo4j.ExecuteQueryWithDatabase(r.dbName),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("[repository][neo4j][GetConnections] failed to execute queries: %w", err)
-	}
-
-	res := make([]entity.PortConnection, 0, len(result.Records))
-
-	for _, record := range result.Records {
-		connection, err := parseConnection(record)
-		if err != nil {
-			return nil, fmt.Errorf("[repository][neo4j][GetPorts] failed to connection port from record: %w", err)
+		if len(path) < 1 {
+			continue
 		}
 
-		res = append(res, connection)
+		res[path[0].ID] = append(res[path[0].ID], path)
 	}
 
 	return res, nil

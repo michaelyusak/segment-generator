@@ -73,7 +73,6 @@ func (r *nodeRepository) GetNode(ctx context.Context, nodeID int64) (*entity.Nod
 				}
 			END
 		) AS ports
-		ORDER BY n.id ASC;
 	`,
 		map[string]any{
 			"id": nodeID,

@@ -58,7 +58,6 @@ func (r *portRepository) GetPort(ctx context.Context, portID string) (*entity.Po
 		MATCH (n: Node)-[:HAS_PORT]->(p)
 		WHERE p.id = $id
 		RETURN p.id as id, p.value as value, n.id as node_id
-		ORDER BY p.id ASC;
 	`,
 		map[string]any{
 			"id": portID,

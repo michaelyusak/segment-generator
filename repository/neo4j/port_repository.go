@@ -168,3 +168,41 @@ func (r *portRepository) GetAllConnections(ctx context.Context) ([]entity.PortCo
 
 	return res, nil
 }
+
+func (r *portRepository) GetPaths(ctx context.Context) (map[string][][]entity.Port, error) {
+	result, err := neo4j.ExecuteQuery(ctx, r.driver, `
+		MATCH (head:Port)
+		WHERE NOT (head)-[:NEXT]->()
+
+		MATCH (tail:Port)
+		WHERE NOT ()-[:NEXT]->(tail)
+
+		MATCH path = (tail)-[:NEXT*]->(head)
+
+		RETURN [p IN reverse(nodes(path)) | {id: p.id, value: p.value}] AS path
+	`,
+		nil,
+		neo4j.EagerResultTransformer,
+		neo4j.ExecuteQueryWithDatabase(r.dbName),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("[repository][neo4j][GetPaths] failed to execute queries: %w", err)
+	}
+
+	res := map[string][][]entity.Port{}
+
+	for _, record := range result.Records {
+		path, err := parsePath(record)
+		if err != nil {
+			return nil, fmt.Errorf("[repository][neo4j][GetPaths] failed to parse path from record: %w", err)
+		}
+
+		if len(path) < 1 {
+			continue
+		}
+
+		res[path[0].ID] = append(res[path[0].ID], path)
+	}
+
+	return res, nil
+}

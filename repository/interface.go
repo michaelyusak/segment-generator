@@ -16,4 +16,5 @@ type Port interface {
 	GetConnections(ctx context.Context) ([]entity.PortConnection, error)
 	GetSegmentHeads(ctx context.Context) ([]entity.Port, error)
 	GetAllConnections(ctx context.Context) ([]entity.PortConnection, error)
+	GetPaths(ctx context.Context) (map[string][][]entity.Port, error)
 }

@@ -213,3 +213,66 @@ func parseConnection(record *neo4jDriver.Record) (entity.PortConnection, error) 
 
 	return connection, nil
 }
+
+func parsePath(record *neo4jDriver.Record) ([]entity.Port, error) {
+	pathAny, ok := record.Get("path")
+	if !ok {
+		return []entity.Port{}, fmt.Errorf("missing path")
+	}
+
+	path, ok := pathAny.([]any)
+	if !ok {
+		return []entity.Port{}, fmt.Errorf("invalid path")
+	}
+
+	pathRes := make([]entity.Port, 0, len(path))
+
+	for _, portAny := range path {
+		portMap, ok := portAny.(map[string]any)
+		if !ok {
+			return pathRes, fmt.Errorf("invalid port")
+		}
+
+		portIDAny, ok := portMap["id"]
+		if !ok {
+			return pathRes, fmt.Errorf("missing port id")
+		}
+
+		portID, ok := portIDAny.(string)
+		if !ok {
+			return pathRes, fmt.Errorf(
+				"port id has type %T, want string",
+				portIDAny,
+			)
+		}
+
+		port := entity.Port{
+			ID: portID,
+		}
+
+		valueAny, ok := portMap["value"]
+		if !ok {
+			return pathRes, fmt.Errorf(
+				"missing port value for port %q",
+				portID,
+			)
+		}
+
+		if valueAny != nil {
+			value, ok := valueAny.(int64)
+			if !ok {
+				return pathRes, fmt.Errorf(
+					"port %q value has type %T, want int64",
+					portID,
+					valueAny,
+				)
+			}
+
+			port.Value = &value
+		}
+
+		pathRes = append(pathRes, port)
+	}
+
+	return pathRes, nil
+}
